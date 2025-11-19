@@ -12,15 +12,21 @@ namespace EclQrCodeManagerAPI.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<User>(entity =>
+            base.OnModelCreating(modelBuilder);
+
+            // Cosmos DB specific configuration
+            if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Cosmos")
             {
-                entity.ToContainer("Users");                 // container name
-                entity.HasPartitionKey(u => u.Email);       // partition key property
-                entity.HasKey(u => u.Id);
-            });
+                modelBuilder.Entity<User>(entity =>
+                {
+                    entity.ToContainer("Users"); // container name
+                    entity.HasPartitionKey(u => u.Email); // partition key property
 
+                    // Configure new fields for Cosmos DB
+                    entity.Property(u => u.VerificationToken).HasMaxLength(100);
+                    entity.Property(u => u.ResetToken).HasMaxLength(100);
+                });
+            }
         }
-
     }
-
 }

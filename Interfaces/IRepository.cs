@@ -1,4 +1,4 @@
-﻿using System;
+﻿﻿using System;
 
 using System.Collections.Generic;
 
@@ -12,7 +12,7 @@ namespace EclQrCodeManagerAPI.Interfaces
 
     {
 
-        Task<T> GetByIdAsync(string id, string partitionKey = null);
+        Task<T?> GetByIdAsync(string id, string? partitionKey = null); // Already correct
 
         Task<IEnumerable<T>> GetAllAsync();
 
@@ -20,9 +20,8 @@ namespace EclQrCodeManagerAPI.Interfaces
 
         Task UpdateAsync(T entity);
 
-        Task DeleteAsync(string id, string partitionKey = null);
+        Task DeleteAsync(string id, string? partitionKey = null); // Already correct
 
     }
 
 }
-

@@ -14,15 +14,16 @@ namespace EclQrCodeManagerAPI.Services
 
         public async Task AddAsync(T entity) { await _set.AddAsync(entity); await _db.SaveChangesAsync(); }
 
-        public async Task DeleteAsync(string id, string partitionKey = null)
+        public Task DeleteAsync(string id, string? partitionKey = null) // Already correct
         {
             // For simplicity, let callers fetch entity then Delete
             // (or implement find by id via EF keys)
+            return Task.CompletedTask;
         }
 
         public async Task<IEnumerable<T>> GetAllAsync() => await _set.ToListAsync();
 
-        public async Task<T> GetByIdAsync(string id, string partitionKey = null) => await _set.FindAsync(id);
+        public async Task<T?> GetByIdAsync(string id, string? partitionKey = null) => await _set.FindAsync(id);
 
         public async Task UpdateAsync(T entity) { _set.Update(entity); await _db.SaveChangesAsync(); }
     }
