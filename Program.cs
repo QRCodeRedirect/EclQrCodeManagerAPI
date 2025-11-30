@@ -10,9 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Load Cosmos DB config
 var cosmosSection = builder.Configuration.GetSection("CosmosDb");
-string account = cosmosSection["Account"];
-string key = cosmosSection["Key"];
-string dbName = cosmosSection["DatabaseName"];
+string account = cosmosSection["Account"] ?? throw new InvalidOperationException("CosmosDb:Account configuration is required.");
+string key = cosmosSection["Key"] ?? throw new InvalidOperationException("CosmosDb:Key configuration is required.");
+string dbName = cosmosSection["DatabaseName"] ?? throw new InvalidOperationException("CosmosDb:DatabaseName configuration is required.");
 
 // DbContext
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -20,9 +20,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 // JWT Configuration
 var jwtSection = builder.Configuration.GetSection("Jwt");
-var jwtSecret = jwtSection["Secret"];
-var jwtIssuer = jwtSection["Issuer"];
-var jwtAudience = jwtSection["Audience"];
+var jwtSecret = jwtSection["Secret"] ?? throw new InvalidOperationException("Jwt:Secret configuration is required.");
+var jwtIssuer = jwtSection["Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer configuration is required.");
+var jwtAudience = jwtSection["Audience"] ?? throw new InvalidOperationException("Jwt:Audience configuration is required.");
 
 builder.Services.AddAuthentication(options =>
 {

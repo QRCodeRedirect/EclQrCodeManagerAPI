@@ -225,14 +225,14 @@ namespace EclQrCodeManagerAPI.Services
         private string GenerateJwtToken(User user)
         {
             var jwtSettings = _config.GetSection("Jwt");
-            var secret = jwtSettings["Secret"];
-            var issuer = jwtSettings["Issuer"];
-            var audience = jwtSettings["Audience"];
+            var secret = jwtSettings["Secret"] ?? throw new InvalidOperationException("Jwt:Secret configuration is required.");
+            var issuer = jwtSettings["Issuer"] ?? throw new InvalidOperationException("Jwt:Issuer configuration is required.");
+            var audience = jwtSettings["Audience"] ?? throw new InvalidOperationException("Jwt:Audience configuration is required.");
 
             var claims = new[]
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.UserID.ToString()),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? throw new InvalidOperationException("User email is required for JWT token generation.")),
                 new Claim("name", user.Username ?? ""),
                 new Claim("division", user.Division ?? ""),
                 new Claim("businessUnit", user.BusinessUnit ?? ""),
@@ -253,15 +253,22 @@ namespace EclQrCodeManagerAPI.Services
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
-        private async Task SendVerificationEmail(string email, string token)
+        private (string SmtpServer, int Port, string Username, string Password, string FromEmail, string FromName) GetEmailSettings()
         {
             var emailSettings = _config.GetSection("Email");
-            var smtpServer = emailSettings["SmtpServer"];
-            var port = int.Parse(emailSettings["Port"]);
-            var username = emailSettings["Username"];
-            var password = emailSettings["Password"];
-            var fromEmail = emailSettings["FromEmail"];
-            var fromName = emailSettings["FromName"];
+            var smtpServer = emailSettings["SmtpServer"] ?? throw new InvalidOperationException("Email:SmtpServer configuration is required.");
+            var portString = emailSettings["Port"] ?? throw new InvalidOperationException("Email:Port configuration is required.");
+            var port = int.Parse(portString);
+            var username = emailSettings["Username"] ?? throw new InvalidOperationException("Email:Username configuration is required.");
+            var password = emailSettings["Password"] ?? throw new InvalidOperationException("Email:Password configuration is required.");
+            var fromEmail = emailSettings["FromEmail"] ?? throw new InvalidOperationException("Email:FromEmail configuration is required.");
+            var fromName = emailSettings["FromName"] ?? throw new InvalidOperationException("Email:FromName configuration is required.");
+            return (smtpServer, port, username, password, fromEmail, fromName);
+        }
+
+        private async Task SendVerificationEmail(string email, string token)
+        {
+            var (smtpServer, port, username, password, fromEmail, fromName) = GetEmailSettings();
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(fromName, fromEmail));
@@ -286,13 +293,7 @@ namespace EclQrCodeManagerAPI.Services
 
         private async Task SendPasswordResetEmail(string email, string token)
         {
-            var emailSettings = _config.GetSection("Email");
-            var smtpServer = emailSettings["SmtpServer"];
-            var port = int.Parse(emailSettings["Port"]);
-            var username = emailSettings["Username"];
-            var password = emailSettings["Password"];
-            var fromEmail = emailSettings["FromEmail"];
-            var fromName = emailSettings["FromName"];
+            var (smtpServer, port, username, password, fromEmail, fromName) = GetEmailSettings();
 
             var message = new MimeMessage();
             message.From.Add(new MailboxAddress(fromName, fromEmail));
