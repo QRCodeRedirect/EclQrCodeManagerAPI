@@ -84,7 +84,7 @@ namespace EclQrCodeManagerAPI.Controllers
         public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var (success, message, token, user) = await _service.LoginAsync(request.Email, request.Password);
-            if (!success)
+            if (!success || token == null || user == null)
                 return BadRequest(new { message });
 
             // Set HttpOnly cookie
@@ -135,27 +135,27 @@ namespace EclQrCodeManagerAPI.Controllers
     // Request models
     public class RegisterRequest
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
-        public string Name { get; set; }
-        public string Division { get; set; }
-        public string BusinessUnit { get; set; }
+        public required string Email { get; set; }
+        public required string Password { get; set; }
+        public required string Name { get; set; }
+        public required string Division { get; set; }
+        public required string BusinessUnit { get; set; }
     }
 
     public class LoginRequest
     {
-        public string Email { get; set; }
-        public string Password { get; set; }
+        public required string Email { get; set; }
+        public required string Password { get; set; }
     }
 
     public class ResetRequest
     {
-        public string Email { get; set; }
+        public required string Email { get; set; }
     }
 
     public class ResetPasswordRequest
     {
-        public string Token { get; set; }
-        public string NewPassword { get; set; }
+        public required string Token { get; set; }
+        public required string NewPassword { get; set; }
     }
 }
